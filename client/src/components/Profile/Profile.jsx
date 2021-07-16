@@ -34,11 +34,12 @@ const Profile = () => {
     const numberOfGames = 10;
     const placementChartData = {
       labels: ['1st', '2nd', '3rd', '4th', '5th', '6th', '7th', '8th'],
+
       datasets: [
         {
-          label: `Past ${numberOfGames} Games`,
+
           data: placementData,
-          
+          dataColor: 'white',
           backgroundColor: [
             'lightGreen',
             'lightBlue',
@@ -50,7 +51,25 @@ const Profile = () => {
             'lightGray',
           ]
         }
-      ], 
+      ],       
+    }
+
+    const options = {
+      
+      plugins: {
+        
+        legend: {
+            display: false,
+        },
+        title: {
+          display: true,
+          text: `Past ${numberOfGames} Games`,
+          color: 'white',  
+        },
+        body: {
+          color: 'white',
+        }
+      }
     }
 
     useEffect(() => {
@@ -424,26 +443,26 @@ const Profile = () => {
       <Grid >
         <Grid container direction = "row" justify = 'space-around' alignItems = 'center' className = {classes.avgRankContainer}>
           <Grid item >
-            <div style = {{display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
+            <div className = {classes.avgRankTextContainer}>
               <Typography className = {classes.avgRankText}>Avg Rank:</Typography>
               <Typography className = {classes.winsText}>{avgRank}</Typography>
             </div>
           </Grid>
           <Grid item>
-            <div style = {{display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
+            <div className = {classes.avgRankTextContainer} >
               <Typography className = {classes.avgRankText}>Wins:</Typography>
               <Typography className = {classes.winsText}>{numberOfWins}</Typography>
             </div>
           </Grid>
           <Grid item>
-          <div style = {{display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
+          <div className = {classes.avgRankTextContainer}>
               <Typography  className = {classes.avgRankText}>Tops:</Typography>
               <Typography className = {classes.winsText}>{numberOfTops}</Typography>
             </div>
           </Grid>
         </Grid>
-        <div class = 'col-md-8' style = {{marginTop: '5px'}} >
-          <Bar width = {350} height = {110} options={{ maintainAspectRatio: false }} data = {placementChartData}/>
+        <div  style = {{marginTop: '2px'}} >
+          <Bar width = {350} height = {110} options={options} data = {placementChartData}/>
         </div>
        </Grid>
       

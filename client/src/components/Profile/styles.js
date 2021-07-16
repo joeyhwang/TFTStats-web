@@ -25,8 +25,8 @@ const useStyles = makeStyles((theme) => ({
     },
     renewButton: {
       marginTop: '20px',
-      height: '40px',
-      width: '33px',
+      minHeight: '40px',
+      width: '25%',
       color: 'white',
       backgroundColor: 'gray', 
       fontSize: '12px',
@@ -40,7 +40,7 @@ const useStyles = makeStyles((theme) => ({
       
     },
     title: {
-      fontSize: '24px',
+      fontSize: '22px',
       fontWeight: '550',
       color: 'white',
     },
@@ -70,6 +70,11 @@ const useStyles = makeStyles((theme) => ({
     avgRankContainer: {
       color: 'white',
       marginBottom: '2px',
+    },
+    avgRankTextContainer: {
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center'
     },
     avgRankText: {
       fontSize: '18px',
