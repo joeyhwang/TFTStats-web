@@ -1,11 +1,8 @@
-import React, {useEffect} from 'react'
-import {Button,IconButton, Typography, AppBar, CssBaseline, Toolbar} from '@material-ui/core';
+import React from 'react';
+import {Button, Typography, AppBar, CssBaseline, Toolbar} from '@material-ui/core';
 import useStyles from './styles';
-import { Link } from 'react-router-dom';
-import MenuIcon from '@material-ui/icons/Menu';
-import HomeIcon from '@material-ui/icons/Home';
 import SearchBar from '../SearchBar/SearchBar'
-import { useHistory ,useLocation } from 'react-router-dom';
+import {useLocation } from 'react-router-dom';
 
 const Appbar = () => {
     const classes = useStyles();
@@ -27,7 +24,7 @@ const Appbar = () => {
                 
                 </div>
                 {location.pathname !== '/' &&
-                <div  style ={{display: 'flex', alignItems: 'center', height:'65px', width:'600px'}}>
+                <div  style ={{display: 'flex', alignItems: 'center',  width:'550px'}}>
                     <SearchBar className = {classes.searchBox} />
                 </div>
                 }

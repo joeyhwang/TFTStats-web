@@ -54,7 +54,7 @@ export default function CustomizedTables(props) {
     var items = Object.keys(dict).map(function(key) {
       return [key, dict[key]];
     });
-    console.log(items)
+    
     items.sort(function(first, second) {
 
       return second[1][1] - first[1][1];

@@ -1,5 +1,5 @@
 import React from 'react'
-import { Grid,  Typography} from '@material-ui/core';
+import {Container, Grid,  Typography} from '@material-ui/core';
 import useStyles from './styles';
 import SearchBar from '../SearchBar/SearchBar'
 
@@ -9,22 +9,26 @@ const HomeBody = () => {
 
     return (
         <div className = {classes.root}>
-            <Grid
-            container
-            spacing={0}
-            direction="column"
-            alignItems="center"
-            justify="center"
-            style={{ minHeight: '60vh' }}
-            >
-
-            <Grid item xs={3}>
-                <Typography className = {classes.title}>TFT Stats</Typography>
-            </Grid>   
-
-            <SearchBar></SearchBar>
+            <Container>
             
-        </Grid> 
+                    <Grid
+                    container
+                    spacing={0}
+                    direction="column"
+                    alignItems="center"
+                    justify="center"
+                    style={{ minHeight: '60vh' }}
+                    >
+
+                    <Grid item xs={3}>
+                        <Typography className = {classes.title}>TFT Stats</Typography>
+                    </Grid>   
+
+                    <SearchBar></SearchBar>
+                    
+                </Grid> 
+
+            </Container>
         </div>
     )
 }

@@ -10,8 +10,10 @@ import { Bar } from 'react-chartjs-2';
 import TimeAgo from 'react-timeago';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import Table from './Table'
+import * as api from '../../api/index.js';
 
 const Profile = () => {
+    const { region, name } = useParams();
     const dispatch = useDispatch();
     const location = useLocation();
     const classes = useStyles();
@@ -24,7 +26,6 @@ const Profile = () => {
     const [wins, setWins] = useState(0);
     const [losses, setLosses] = useState(0);
     const [tier, setTier] = useState('');
-    const { region, name } = useParams();
     const [matchesArray, setMatchesArray] = useState([]);
     const [summonerExists, setSummonerExists] = useState(true);
     const [loading, setLoading] = useState(true);
@@ -32,9 +33,9 @@ const Profile = () => {
     const [littleLegendDictionary, setLittleLegendDictionary] = useState(null);
     let placementData = [0,0,0,0,0,0,0,0];
     const numberOfGames = 10;
+    const [ddragonVersion, setDdragonVersion] = useState("");
     const placementChartData = {
       labels: ['1st', '2nd', '3rd', '4th', '5th', '6th', '7th', '8th'],
-
       datasets: [
         {
 
@@ -55,9 +56,7 @@ const Profile = () => {
     }
 
     const options = {
-      
       plugins: {
-        
         legend: {
             display: false,
         },
@@ -75,33 +74,25 @@ const Profile = () => {
     useEffect(() => {
       //fetch item and little legend json and convert it into a dictionary to store it in the state
         let itemD = {};
-        fetch("/json-data/items.json"
-        ,{
-          headers : { 
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-            }
-        }
-        ).then( itemResponse =>{
-            return itemResponse.json();
-        }).then( itemJson => {
-          for (let item = 0; item < itemJson.length; item++) {          
-            itemD[itemJson[item]['id']] = itemJson[item]['name'];
+        let llDict = {};
+        api.items.then((itemResponse)=>{
+          for (let item = 0; item < itemResponse.length; item++) {          
+            itemD[itemResponse[item]['id']] = itemResponse[item]['name'];
           }
           setItemDictionary(itemD);
         });
-
-        let llDict = {};
-
-        fetch("https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/companions.json"
-        ).then( llResponse => {
-          return llResponse.json();
-        }).then (llJson => {
-          for (let i = 0; i< llJson.length; i++) {
-            llDict[llJson[i]['contentId']] = [llJson[i]['loadoutsIcon'].substring(21).toLowerCase(),llJson[i]['name']];
+        
+        api.summonerIcon.then((summonerIconResponse) => {
+          for (let i = 0; i< summonerIconResponse.length; i++) {
+            llDict[summonerIconResponse[i]['contentId']] = [summonerIconResponse[i]['loadoutsIcon'].substring(21).toLowerCase(),summonerIconResponse[i]['name']]; 
           }
+          setLittleLegendDictionary(llDict);
         });
-        setLittleLegendDictionary(llDict);
+
+        api.ddragonVersion.then((ddragonResponse) => {
+          setDdragonVersion(ddragonResponse);
+        });
+
     }, []);
     
     useEffect(() => {
@@ -112,31 +103,32 @@ const Profile = () => {
           //get ranked tft data for summoner
           try {
           if (res[summonerDetailsJson][0]['queueType'] !== 'RANKED_TFT_TURBO') {
-            setLP(res[summonerDetailsJson][0]['leaguePoints']);
-            setWins(res[summonerDetailsJson][0]['wins']);
-            setLosses(res[summonerDetailsJson][0]['losses']);
-            setTier(res[summonerDetailsJson][0]['tier']);
-            setRankNumeral(res[summonerDetailsJson][0]['rank']);
+            const {leaguePoints, wins, losses, tier, rank} = res[summonerDetailsJson][0];
+            setLP(leaguePoints);
+            setWins(wins);
+            setLosses(losses);
+            setTier(tier);
+            setRankNumeral(rank);
           } else {
-            setLP(res[summonerDetailsJson][1]['leaguePoints']);
-            setWins(res[summonerDetailsJson][1]['wins']);
-            setLosses(res[summonerDetailsJson][1]['losses']);
-            setTier(res[summonerDetailsJson][1]['tier']);
-            setRankNumeral(res[summonerDetailsJson][1]['rank']);
+            const {leaguePoints, wins, losses, tier, rank} = res[summonerDetailsJson][1];
+            setLP(leaguePoints);
+            setWins(wins);
+            setLosses(losses);
+            setTier(tier);
+            setRankNumeral(rank);
           }
-
           //set all profile variables
-          setName(res[profileJson]['name']);
-          setId(res[profileJson]['profileIconId']);
-          setSummonerLevel(res[profileJson]['summonerLevel']);
-          setPuuid(res[profileJson]['puuid']);
+          const {name, profileIconId, summonerLevel, puuid} = res[profileJson];
+          setName(name);
+          setId(profileIconId);
+          setSummonerLevel(summonerLevel);
+          setPuuid(puuid);
           } catch (e) {
             setSummonerExists(false);
             setLoading(false);
           }
           res[profileJson][matchJson].forEach(matchId => {
             dispatch(getMatchByMatchID(matchId, region)).then(res => {
-              
               setMatchesArray(arr => [...arr, res['info']]);
             })
           })
@@ -156,23 +148,24 @@ const Profile = () => {
             participantIndex = i;
           }
         }
+
         return participantIndex;
     }
 
     const displayMatchDetails = (match) => {
         const p = match['participants'];
         let participantIndex = getParticipantIndex(match);
+        
         let traitDictionary = {};
         let placementColor = 'white';
         let queueType = '';
         
         //set variables to display
-        const traits = match['participants'][participantIndex]['traits'];
-        const lastRound = p[participantIndex]['last_round'];
-        const convertedLastRound = convertLastRound(lastRound);
-        const placement = p[participantIndex]['placement'];
-        const level = p[participantIndex]['level']
-        const queue_id = match['queue_id'];
+        const {last_round, placement, level} = p[participantIndex];
+        const {traits} = match['participants'][participantIndex];
+        const convertedLastRound = convertLastRound(last_round);
+
+        const {queue_id} = match;
         let littleLegend = littleLegendDictionary[p[participantIndex]['companion']['content_ID']];
         let llLink = "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default" + littleLegend[0] ;
         //get the traits and put it into a dictionary
@@ -183,7 +176,7 @@ const Profile = () => {
         }
         
         //sort traits by descending order
-        let sortedTraitsArray = Object.keys(traitDictionary).map(function(key) {
+        let sortedTraitsArray = Object.keys(traitDictionary).map((key) => {
           return [key, traitDictionary[key]];
         });
         
@@ -357,7 +350,7 @@ const Profile = () => {
     }
 
     const championImageDetails = (champion) => {
-      const rarity = champion['rarity'];
+      const {rarity} = champion;
       let borderColor = 'white';
       //set correct border color of champions
       switch (rarity) {
@@ -421,20 +414,17 @@ const Profile = () => {
         return b.game_datetime - a.game_datetime;
       })
       for (let i = 0; i < matchArray.length; i++) {
-        
         let participantIndex = getParticipantIndex(matchArray[i]);
         const p = matchArray[i]['participants'];
-        let placement = p[participantIndex]['placement'];
+        let {placement} = p[participantIndex];
 
         avgRank += placement;
-        console.log(numberOfWins);
-        if (placement == 1) {
+        if (placement === 1) {
           numberOfWins += 1;
         } 
         if (placement <= 4 && placement > 1) {
           numberOfTops += 1;
         }
-        
       }
       avgRank = avgRank / matchArray.length;
       
@@ -482,14 +472,14 @@ const Profile = () => {
         let checkDuplicateChampArray = [];
 
         for (let j = 0; j < unitArray.length; j++) {
-          let win = 0;
-          let top = 0;
+          let win, top;
+          win = top = 0;
           let championId = unitArray[j]['character_id'];
           if (checkDuplicateChampArray.includes(championId)) {
             continue
           } 
           checkDuplicateChampArray.push(championDict[championId]);
-          if (placement == 1) {
+          if (placement === 1) {
             win = 1;
           } else if (placement > 1 && placement < 5) {
             top = 1;
@@ -505,7 +495,6 @@ const Profile = () => {
           }
       }
     }
-
       return (<>
           <Table dict = {championDict}></Table>          
       </>)
@@ -526,7 +515,7 @@ const Profile = () => {
                       <Paper elevation = {3} className = {classes.firstRowPaper}>
                         <Grid container direction = "row" spacing = {2}>
                             <Grid item >
-                              <img alt = "icon" src = {`https://ddragon.leagueoflegends.com/cdn/11.13.1/img/profileicon/${profileIconId}.png`} className = {classes.profileIcon}></img>
+                              <img alt = "icon" src = {`https://ddragon.leagueoflegends.com/cdn/${ddragonVersion}/img/profileicon/${profileIconId}.png`} className = {classes.profileIcon}></img>
                             </Grid>
                             <Grid item>
                               <Typography display = "inline" className = {classes.title}>{summonerName} </Typography>
@@ -543,7 +532,7 @@ const Profile = () => {
                       <Paper elevation = {3}  className = {classes.firstRowPaper}>
                       <Grid container direction = "row" spacing = {2}>
                       <Grid item>
-                        <img className = {classes.rankEmblem} src = {`/ranked-emblems/Emblem_${tier}.png`}/>
+                        <img className = {classes.rankEmblem} src = {`/ranked-emblems/Emblem_${tier}.png`} alt = ""/>
                       </Grid>
                       
                       <Grid item>

@@ -29,6 +29,7 @@ const SearchBar = () => {
 
     }, [region]);
 
+
     const handleToggle = () => {
       //open/close menu
         setOpen((prevOpen) => !prevOpen);
