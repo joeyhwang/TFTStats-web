@@ -11,6 +11,8 @@ import TimeAgo from 'react-timeago';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import Table from './Table'
 import * as api from '../../api/index.js';
+import ReactPaginate from 'react-paginate';
+import "./Profile.css";
 
 const Profile = () => {
     const { region, name } = useParams();
@@ -26,6 +28,7 @@ const Profile = () => {
     const [wins, setWins] = useState(0);
     const [losses, setLosses] = useState(0);
     const [tier, setTier] = useState('');
+    const [matchIdArray, setMatchIdArray] = useState([]);
     const [matchesArray, setMatchesArray] = useState([]);
     const [summonerExists, setSummonerExists] = useState(true);
     const [loading, setLoading] = useState(true);
@@ -34,42 +37,11 @@ const Profile = () => {
     let placementData = [0,0,0,0,0,0,0,0];
     const numberOfGames = 10;
     const [ddragonVersion, setDdragonVersion] = useState("");
-    const placementChartData = {
-      labels: ['1st', '2nd', '3rd', '4th', '5th', '6th', '7th', '8th'],
-      datasets: [
-        {
+    const matchesPerPage = 10;
 
-          data: placementData,
-          dataColor: 'white',
-          backgroundColor: [
-            'lightGreen',
-            'lightBlue',
-            'lightBlue',
-            'lightBlue',
-            'lightGray',
-            'lightGray',
-            'lightGray',
-            'lightGray',
-          ]
-        }
-      ],       
-    }
+    const pageCount = Math.ceil(matchIdArray.length / matchesPerPage);
+    // const displayUsers = matchIdArray.slice(pagesVisited, pagesVisited + matchesPerPage); 
 
-    const options = {
-      plugins: {
-        legend: {
-            display: false,
-        },
-        title: {
-          display: true,
-          text: `Past ${numberOfGames} Games`,
-          color: 'white',  
-        },
-        body: {
-          color: 'white',
-        }
-      }
-    }
 
     useEffect(() => {
       //fetch item and little legend json and convert it into a dictionary to store it in the state
@@ -96,50 +68,108 @@ const Profile = () => {
     }, []);
     
     useEffect(() => {
+        //runs whenever a summoner is searched
         setMatchesArray([]);
         setSummonerExists(true);
         setLoading(true);
         dispatch(getSummonerBySearch(name, region)).then(res => {
           //get ranked tft data for summoner
           try {
-          if (res[summonerDetailsJson][0]['queueType'] !== 'RANKED_TFT_TURBO') {
-            const {leaguePoints, wins, losses, tier, rank} = res[summonerDetailsJson][0];
-            setLP(leaguePoints);
-            setWins(wins);
-            setLosses(losses);
-            setTier(tier);
-            setRankNumeral(rank);
-          } else {
-            const {leaguePoints, wins, losses, tier, rank} = res[summonerDetailsJson][1];
-            setLP(leaguePoints);
-            setWins(wins);
-            setLosses(losses);
-            setTier(tier);
-            setRankNumeral(rank);
-          }
-          //set all profile variables
-          const {name, profileIconId, summonerLevel, puuid} = res[profileJson];
-          setName(name);
-          setId(profileIconId);
-          setSummonerLevel(summonerLevel);
-          setPuuid(puuid);
+            if (res[summonerDetailsJson][0]['queueType'] !== 'RANKED_TFT_TURBO') {
+              const {leaguePoints, wins, losses, tier, rank} = res[summonerDetailsJson][0];
+              setLP(leaguePoints);
+              setWins(wins);
+              setLosses(losses);
+              setTier(tier);
+              setRankNumeral(rank);
+            } else {
+              const {leaguePoints, wins, losses, tier, rank} = res[summonerDetailsJson][1];
+              setLP(leaguePoints);
+              setWins(wins);
+              setLosses(losses);
+              setTier(tier);
+              setRankNumeral(rank);
+            }
+              //set all profile variables
+              const {name, profileIconId, summonerLevel, puuid} = res[profileJson];
+              setName(name);
+              setId(profileIconId);
+              setSummonerLevel(summonerLevel);
+              setPuuid(puuid);
           } catch (e) {
             setSummonerExists(false);
             setLoading(false);
           }
-          res[profileJson][matchJson].forEach(matchId => {
+          
+          
+          setMatchIdArray(res[profileJson][matchJson]);
+          for (const matchId of res[profileJson][matchJson].slice(0, matchesPerPage)) {
+            
             dispatch(getMatchByMatchID(matchId, region)).then(res => {
+              console.log(res);
               setMatchesArray(arr => [...arr, res['info']]);
             })
-          })
+          }
+                    
           setLoading(false);
         }).catch(err => {
           //summoner doesn't exist
+          console.error(err);
           setSummonerExists(false);
           setLoading(false);
         }); 
       }, [location]);
     
+      const changePage = ({selected}) => {
+        setMatchesArray([]);
+        let pagesVisited = selected * matchesPerPage;
+        for (const matchId of matchIdArray.slice(pagesVisited, pagesVisited + matchesPerPage)) {
+          
+          dispatch(getMatchByMatchID(matchId, region)).then(res => {
+            
+            setMatchesArray(arr => [...arr, res['info']]);
+          })
+        }
+  
+      }
+  
+      const placementChartData = {
+        labels: ['1st', '2nd', '3rd', '4th', '5th', '6th', '7th', '8th'],
+        datasets: [
+          {
+  
+            data: placementData,
+            dataColor: 'white',
+            backgroundColor: [
+              'lightGreen',
+              'aqua',
+              'aqua',
+              'aqua',
+              'lightGray',
+              'lightGray',
+              'lightGray',
+              'lightGray',
+            ]
+          }
+        ],       
+      }
+  
+      const options = {
+        plugins: {
+          legend: {
+              display: false,
+          },
+          title: {
+            display: true,
+            text: `Match History (${numberOfGames}) Games`,
+            color: 'white',  
+          },
+          body: {
+            color: 'white',
+          }
+        }
+      }
+
     const getParticipantIndex = (match) => {
         const p = match['participants'];
         let participantIndex = 0;
@@ -191,7 +221,7 @@ const Profile = () => {
             placementColor = 'lightGreen';
             break;
           case 2: case 3: case 4: 
-            placementColor = 'lightBlue';
+            placementColor = 'aqua';
             break;
           default:
             placementColor = 'lightGray';
@@ -410,9 +440,7 @@ const Profile = () => {
       
       let avgRank, numberOfWins, numberOfTops;
       avgRank = numberOfWins = numberOfTops = 0; 
-      const matchArray = [...matchesArray].sort((a,b) => {
-        return b.game_datetime - a.game_datetime;
-      })
+      const matchArray = [...matchesArray];
       for (let i = 0; i < matchArray.length; i++) {
         let participantIndex = getParticipantIndex(matchArray[i]);
         const p = matchArray[i]['participants'];
@@ -461,9 +489,7 @@ const Profile = () => {
 
     const createTableArray = () => {
       let championDict = {};
-      const matchArray = [...matchesArray].sort((a,b) => {
-        return b.game_datetime - a.game_datetime;
-      })
+      const matchArray = [...matchesArray];
       for  (let i = 0; i < matchArray.length; i++) {
         let participantIndex = getParticipantIndex(matchArray[i]);
         const p = matchArray[i]['participants'];
@@ -478,7 +504,7 @@ const Profile = () => {
           if (checkDuplicateChampArray.includes(championId)) {
             continue
           } 
-          checkDuplicateChampArray.push(championDict[championId]);
+          checkDuplicateChampArray = [...checkDuplicateChampArray, championDict[championId]];
           if (placement === 1) {
             win = 1;
           } else if (placement > 1 && placement < 5) {
@@ -551,7 +577,7 @@ const Profile = () => {
                     
                     <Grid item md = {4} sm = {6} xs = {12} className = {classes.firstRowSubContainer}>
                        <Paper elevation = {3}  className = {classes.firstRowPaper}>
-                      { matchesArray.length === numberOfGames &&
+                      { matchesArray.length >= matchesPerPage &&
                         placementSection()
                       }  
        
@@ -568,7 +594,7 @@ const Profile = () => {
                       <Typography className = {classes.title} gutterBottom>Match History</Typography>
                       
                       <Grid container direction = "column" spacing = {2} >
-                      { matchesArray.length === numberOfGames &&
+                      { matchesArray.length === matchesPerPage &&
                       
                         [...matchesArray].sort((a,b) => {
                           return b.game_datetime - a.game_datetime;
@@ -581,19 +607,21 @@ const Profile = () => {
                                   }
                                 )
                       }
+                      <ReactPaginate
+                        previousLabel = {"Prev"} nextLabel = {"Next"} pageCount = {pageCount} onPageChange = {changePage} containerClassName={"paginationBtns"}
+                        previousLinkClassName={"previousBtn"} nextLinkClassName={"nextBtn"} disabledClassName={"paginationDisabled"} activeClassName={"paginationActive"}
+                      />
                       </Grid>
                     </Grid>
 
-                    <Grid item md = {4} sm = {6} xs = {12}>
-                      <Typography className = {classes.title} style = {{marginLeft: '8px'}} gutterBottom>Champion Stats</Typography>
+                      <Grid item md = {4} sm = {6} xs = {12}>
+                        <Typography className = {classes.title} style = {{marginLeft: '8px'}} gutterBottom>Champion Stats</Typography>
+                        
+                          { matchesArray.length === matchesPerPage &&
+                          createTableArray()
+                          }
+                      </Grid>
                       
-                        { matchesArray.length === numberOfGames &&
-                        createTableArray()
-                        }
-                      
-                    </Grid>
-                
-                   
                     </Grid>
 
                 </Grid>
@@ -608,11 +636,9 @@ const Profile = () => {
                     <Typography className = {classes.summonerError}>{name} {region.toUpperCase()} doesn't have any ranked TFT Stats or doesn't exist</Typography>
                   </Grid>
 
-                
                </Container>
               }
             </Container>
-            
         </div>
     )
 }

@@ -13,7 +13,7 @@ export const getSummonerBySearch = async (req,res) => {
     var puuid = "";
     var id = "";
     var profileJson = new Object();
-    var count = 10;
+    var numberOfGames = 100;
     //remove blank spaces from name variable
     name = name.replace(/\s+/g, '');
     console.log(`get summoner by search region: ${region}, name: ${name}` )
@@ -33,7 +33,7 @@ export const getSummonerBySearch = async (req,res) => {
             id = json['id'];
             profileJson = json;
             //get summoner match ids
-            return fetch(encodeURI(`https://${country}.api.riotgames.com/tft/match/v1/matches/by-puuid/${puuid}/ids?count=${count}&api_key=${API_KEY}`));
+            return fetch(encodeURI(`https://${country}.api.riotgames.com/tft/match/v1/matches/by-puuid/${puuid}/ids?count=${numberOfGames}&api_key=${API_KEY}`));
             
         }
     ).then(matchResponse => matchResponse.json())
@@ -71,19 +71,21 @@ export const getMatchDetails = async (req,res) => {
     const matchLink = encodeURI(`https://${country}.api.riotgames.com/tft/match/v1/matches/${match}?api_key=${API_KEY}`);
     console.log(matchLink);
 
-    fetch(matchLink)
-    .then(res => res.json())
-    .then(matchJson => 
-        {            
+    const getData = async () => {
+        try {
+            const matchRes = await fetch(matchLink);
+            const matchJson = await matchRes.json();
             console.log(matchJson);
             //return match details in json format to front-end
             res.status(200).json({data: matchJson});
+
+        } catch(err) {
+            console.log(err);
+            res.status(404).json({message: err.message});
         }
-    )
-    .catch(err => {
-        console.log(err);
-        res.status(404).json({message: err.message});
-    });
+    }
+
+    getData();
 
 }
 

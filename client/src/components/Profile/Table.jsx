@@ -51,11 +51,11 @@ export default function CustomizedTables(props) {
   }
 
   const sortObject = (dict) => {
-    var items = Object.keys(dict).map(function(key) {
+    var items = Object.keys(dict).map((key) => {
       return [key, dict[key]];
     });
     
-    items.sort(function(first, second) {
+    items.sort((first, second) => {
 
       return second[1][1] - first[1][1];
     });
