@@ -24,7 +24,7 @@ const useStyles = makeStyles((theme) => ({
       borderRadius: '6px',
     },
     renewButton: {
-      marginTop: '20px',
+      marginTop: '25px',
       minHeight: '40px',
       width: '25%',
       color: 'white',

@@ -34,6 +34,7 @@ const Profile = () => {
     const [loading, setLoading] = useState(true);
     const [itemDictionary, setItemDictionary] = useState(null);
     const [littleLegendDictionary, setLittleLegendDictionary] = useState(null);
+    const [cachedMatchesArray, setCatchedMatchesArray] = useState([]);
     let placementData = [0,0,0,0,0,0,0,0];
     const numberOfGames = 10;
     const [ddragonVersion, setDdragonVersion] = useState("");
@@ -101,10 +102,8 @@ const Profile = () => {
             setLoading(false);
           }
           
-          
           setMatchIdArray(res[profileJson][matchJson]);
           for (const matchId of res[profileJson][matchJson].slice(0, matchesPerPage)) {
-            
             dispatch(getMatchByMatchID(matchId, region)).then(res => {
               console.log(res);
               setMatchesArray(arr => [...arr, res['info']]);
@@ -119,25 +118,23 @@ const Profile = () => {
           setLoading(false);
         }); 
       }, [location]);
-    
+      
+      //pagination function 
       const changePage = ({selected}) => {
         setMatchesArray([]);
         let pagesVisited = selected * matchesPerPage;
         for (const matchId of matchIdArray.slice(pagesVisited, pagesVisited + matchesPerPage)) {
-          
           dispatch(getMatchByMatchID(matchId, region)).then(res => {
-            
             setMatchesArray(arr => [...arr, res['info']]);
           })
         }
-  
       }
   
+      //chart function
       const placementChartData = {
         labels: ['1st', '2nd', '3rd', '4th', '5th', '6th', '7th', '8th'],
         datasets: [
           {
-  
             data: placementData,
             dataColor: 'white',
             backgroundColor: [
@@ -153,7 +150,8 @@ const Profile = () => {
           }
         ],       
       }
-  
+      
+      //chart options
       const options = {
         plugins: {
           legend: {
@@ -178,131 +176,12 @@ const Profile = () => {
             participantIndex = i;
           }
         }
-
         return participantIndex;
     }
 
-    const displayMatchDetails = (match) => {
-        const p = match['participants'];
-        let participantIndex = getParticipantIndex(match);
-        
-        let traitDictionary = {};
-        let placementColor = 'white';
-        let queueType = '';
-        
-        //set variables to display
-        const {last_round, placement, level} = p[participantIndex];
-        const {traits} = match['participants'][participantIndex];
-        const convertedLastRound = convertLastRound(last_round);
-
-        const {queue_id} = match;
-        let littleLegend = littleLegendDictionary[p[participantIndex]['companion']['content_ID']];
-        let llLink = "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default" + littleLegend[0] ;
-        //get the traits and put it into a dictionary
-        for (let j = 0; j < traits.length; j++) {
-          if (traits[j]['style'] > 0) {
-            traitDictionary[`${traits[j]['num_units']} ${traits[j]['name'].substring(5)}`] = traits[j]['style'];
-          }
-        }
-        
-        //sort traits by descending order
-        let sortedTraitsArray = Object.keys(traitDictionary).map((key) => {
-          return [key, traitDictionary[key]];
-        });
-        
-        // Sort the array based on the second element
-        sortedTraitsArray.sort(function(first, second) {
-          return second[1] - first[1];
-        });
-
-        //set placement data
-        switch (placement) {
-          case 1:
-            placementColor = 'lightGreen';
-            break;
-          case 2: case 3: case 4: 
-            placementColor = 'aqua';
-            break;
-          default:
-            placementColor = 'lightGray';
-        }
-        //sessionWins += placement;
-        placementData[placement-1] = placementData[placement-1] + 1;
-        //sessionWins += 1;
-        //convert queue id to queue type
-        switch (queue_id) {
-          case 1090:
-            queueType = 'Normal';
-            break;
-          case 1100:
-            queueType = 'Ranked';
-            break;
-          case 1110:
-            queueType = 'Tutorial';
-            break;
-          default:
-            queueType = 'Test';
-        }
-
-        return(
-            <>
-            <Grid container direction = "row" className = {classes.matchContainer} spacing = {2} style = {{borderLeft: `6px solid ${placementColor}`, borderRight: `6px solid ${placementColor}`}} >
-              <Grid item md = {1} className = {classes.matchSubContainer}>
-                <Typography className = {classes.placementText} style = {{color: placementColor}}>#{placement}</Typography>
-                <Typography className = {classes.matchSubContainerText}>{queueType}</Typography>
-                <Typography className = {classes.matchSubContainerText} >{new Date(p[participantIndex]['time_eliminated'] * 1000).toISOString().substr(14, 5)}</Typography>
-                <TimeAgo className = {classes.timeAgo} date = {new Date(match['game_datetime'])}></TimeAgo>
-              </Grid>
-              <Grid item md = {2} className = {classes.matchSubContainer} >
-                <img className = {classes.llImage} alt = "beef" src = {llLink} title = {littleLegend[1]}/>
-                <Typography className = {classes.matchSubContainerText}>Round {convertedLastRound}</Typography>
-                <Typography className = {classes.matchSubContainerText}>Level {level}</Typography>
-              </Grid>
-
-              <Grid item md = {2}  className = {classes.traitSubContainer}>
-                <Grid md = {10} item container direction = "row">
-                {
-                  sortedTraitsArray.map((traitArray, index) => {
-                    return ( <div key = {index}>
-                              <Grid  item> 
-                                <div style = {{backgroundImage: `url(/traits/${traitArray[1]}.png)`, backgroundPosition: 'center', 
-                                height: '25px', width: '27px', display: 'flex', alignItems: 'center', justifyContent: 'center'}} >
-                                  
-                                  <img className = {classes.traits} alt = {traitArray[0].substring(2).toLowerCase()} 
-                                  src = {`/traits/${traitArray[0].substring(2).toLowerCase()}.svg`} title = {`${traitArray[0]}`} />
-                                </div>
-                              </Grid>
-                            </div>
-                          )
-                    }
-                  )
-                }
-                </Grid>
-              </Grid>
-
-              <Grid item md = {7} className = {classes.championSubContainer} >
-                <Grid md = {12} item container direction = "row">
-              {
-                match['participants'][participantIndex]['units'].map((champion, index) => {
-                  return (<div key = {index}>
-                          <Grid>
-                            {championImageDetails(champion)}
-                          </Grid>
-                          
-                        </div>
-                        )
-                  }
-                )
-              }
-                </Grid>
-              </Grid>
-            </Grid>
-            </> 
-      )
-    }
-
+    
+    //function for converting the last round integer into game rounds
     const convertLastRound = (lastRound) => {
-      //function for converting the last round integer into game rounds
       switch (lastRound) {
         case 12: 
           return "3-1";
@@ -379,6 +258,220 @@ const Profile = () => {
       }
     }
 
+      //function for displaying the first two cards: name and tier
+      const nameAndTierSection = () => {
+        return (
+          <>
+          <Grid item md = {4} sm = {6} xs = {12}  className = {classes.firstRowSubContainer}>
+            <Paper elevation = {3} className = {classes.firstRowPaper}>
+              <Grid container direction = "row" spacing = {2}>
+                  <Grid item >
+                    <img alt = "icon" src = {`https://ddragon.leagueoflegends.com/cdn/${ddragonVersion}/img/profileicon/${profileIconId}.png`} className = {classes.profileIcon}></img>
+                  </Grid>
+                  <Grid item>
+                    <Typography display = "inline" className = {classes.title}>{summonerName} </Typography>
+                    <Typography display =  "inline" className = {classes.region} >{region.toUpperCase()}</Typography>
+                    <Typography gutterBottom className = {classes.summonerLevel}>Level {summonerLevel}</Typography>
+                    <Button variant = "contained" className = {classes.renewButton}>Renew</Button>
+                    <Typography></Typography>
+                  </Grid>
+              </Grid>  
+              </Paper>
+          </Grid>
+            
+            <Grid item md = {4} sm = {6} xs = {12} className = {classes.firstRowSubContainer}>
+              <Paper elevation = {3}  className = {classes.firstRowPaper}>
+                <Grid container direction = "row" spacing = {2}>
+                  <Grid item>
+                    <img className = {classes.rankEmblem} src = {`/ranked-emblems/Emblem_${tier}.png`} alt = ""/>
+                  </Grid>
+                  
+                  <Grid item>
+                    <Typography className = {classes.title}>{`${tier} ${rankNumeral}`}</Typography>
+                    <Typography className = {classes.lp}> {`LP: ${lp}`}</Typography>
+                    <Typography className = {classes.winsText}>{`Wins: ${wins}`}</Typography>
+                    <Typography className = {classes.winsText}>{`Losses: ${losses}`}</Typography>
+                    <Typography className = {classes.winsText}>{`Total Games: ${wins + losses}`}</Typography>
+                    <Typography className = {classes.winsText}>{`Win Rate: ${Number.parseFloat((wins/(wins + losses))* 100).toFixed(2)}%`}</Typography>
+                  </Grid>
+                </Grid>
+              </Paper>
+            </Grid>
+          </>
+        )
+      }
+
+      
+    //function for the third card: avg rank, wins, tops
+    const placementSection = () => {
+      let avgRank, numberOfWins, numberOfTops;
+      avgRank = numberOfWins = numberOfTops = 0; 
+      const matchArray = [...matchesArray];
+      for (let i = 0; i < matchArray.length; i++) {
+        let participantIndex = getParticipantIndex(matchArray[i]);
+        const p = matchArray[i]['participants'];
+        let {placement} = p[participantIndex];
+
+        avgRank += placement;
+        if (placement === 1) {
+          numberOfWins += 1;
+        } 
+        if (placement <= 4 && placement > 1) {
+          numberOfTops += 1;
+        }
+      }
+      avgRank = avgRank / matchArray.length;
+      
+      return (
+      <>
+      <Grid >
+        <Grid container direction = "row" justify = 'space-around' alignItems = 'center' className = {classes.avgRankContainer}>
+          <Grid item >
+            <div className = {classes.avgRankTextContainer}>
+              <Typography className = {classes.avgRankText}>Avg Rank:</Typography>
+              <Typography className = {classes.winsText}>{avgRank}</Typography>
+            </div>
+          </Grid>
+          <Grid item>
+            <div className = {classes.avgRankTextContainer} >
+              <Typography className = {classes.avgRankText}>Wins:</Typography>
+              <Typography className = {classes.winsText}>{numberOfWins}</Typography>
+            </div>
+          </Grid>
+          <Grid item>
+          <div className = {classes.avgRankTextContainer}>
+              <Typography  className = {classes.avgRankText}>Tops:</Typography>
+              <Typography className = {classes.winsText}>{numberOfTops}</Typography>
+            </div>
+          </Grid>
+        </Grid>
+        <div  style = {{marginTop: '2px'}} >
+          <Bar width = {350} height = {110} options={options} data = {placementChartData}/>
+        </div>
+       </Grid>
+      
+      </>)
+    }
+    
+    //function for displaying each match in the match history
+    const displayMatchDetails = (match) => {
+        const p = match['participants'];
+        let participantIndex = getParticipantIndex(match);
+        let traitDictionary = {};
+        let placementColor = 'white';
+        let queueType = '';
+        
+        //set variables to display
+        const {last_round, placement, level} = p[participantIndex];
+        const {traits} = match['participants'][participantIndex];
+        const convertedLastRound = convertLastRound(last_round);
+
+        const {queue_id} = match;
+        let littleLegend = littleLegendDictionary[p[participantIndex]['companion']['content_ID']];
+        let llLink = "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default" + littleLegend[0] ;
+        //get the traits and put it into a dictionary
+        for (let j = 0; j < traits.length; j++) {
+          if (traits[j]['style'] > 0) {
+            traitDictionary[`${traits[j]['num_units']} ${traits[j]['name'].substring(5)}`] = traits[j]['style'];
+          }
+        }
+        
+        //sort traits by descending order
+        let sortedTraitsArray = Object.keys(traitDictionary).map((key) => {
+          return [key, traitDictionary[key]];
+        });
+        
+        // Sort the array based on the second element
+        sortedTraitsArray.sort(function(first, second) {
+          return second[1] - first[1];
+        });
+
+        //set placement data
+        switch (placement) {
+          case 1:
+            placementColor = 'lightGreen';
+            break;
+          case 2: case 3: case 4: 
+            placementColor = 'aqua';
+            break;
+          default:
+            placementColor = 'lightGray';
+        }
+        //sessionWins += placement;
+        placementData[placement-1] = placementData[placement-1] + 1;
+        //convert queue id to queue type
+        switch (queue_id) {
+          case 1090:
+            queueType = 'Normal';
+            break;
+          case 1100:
+            queueType = 'Ranked';
+            break;
+          case 1110:
+            queueType = 'Tutorial';
+            break;
+          default:
+            queueType = 'Test';
+        }
+
+        return(
+            <>
+            <Grid container direction = "row" className = {classes.matchContainer} spacing = {2} style = {{borderLeft: `6px solid ${placementColor}`, borderRight: `6px solid ${placementColor}`}} >
+              <Grid item md = {1} className = {classes.matchSubContainer}>
+                <Typography className = {classes.placementText} style = {{color: placementColor}}>#{placement}</Typography>
+                <Typography className = {classes.matchSubContainerText}>{queueType}</Typography>
+                <Typography className = {classes.matchSubContainerText} >{new Date(p[participantIndex]['time_eliminated'] * 1000).toISOString().substr(14, 5)}</Typography>
+                <TimeAgo className = {classes.timeAgo} date = {new Date(match['game_datetime'])}></TimeAgo>
+              </Grid>
+              <Grid item md = {2} className = {classes.matchSubContainer} >
+                <img className = {classes.llImage} alt = "beef" src = {llLink} title = {littleLegend[1]}/>
+                <Typography className = {classes.matchSubContainerText}>Round {convertedLastRound}</Typography>
+                <Typography className = {classes.matchSubContainerText}>Level {level}</Typography>
+              </Grid>
+
+              <Grid item md = {2}  className = {classes.traitSubContainer}>
+                <Grid md = {10} item container direction = "row">
+                {
+                  sortedTraitsArray.map((traitArray, index) => {
+                    return ( <div key = {index}>
+                              <Grid  item> 
+                                <div style = {{backgroundImage: `url(/traits/${traitArray[1]}.png)`, backgroundPosition: 'center', 
+                                height: '25px', width: '27px', display: 'flex', alignItems: 'center', justifyContent: 'center'}} >
+                                  
+                                  <img className = {classes.traits} alt = {traitArray[0].substring(2).toLowerCase()} 
+                                  src = {`/traits/${traitArray[0].substring(2).toLowerCase()}.svg`} title = {`${traitArray[0]}`} />
+                                </div>
+                              </Grid>
+                            </div>
+                          )
+                    }
+                  )
+                }
+                </Grid>
+              </Grid>
+
+              <Grid item md = {7} className = {classes.championSubContainer} >
+                <Grid md = {12} item container direction = "row">
+              {
+                match['participants'][participantIndex]['units'].map((champion, index) => {
+                  return (<div key = {index}>
+                          <Grid>
+                            {championImageDetails(champion)}
+                          </Grid>
+                          
+                        </div>
+                        )
+                  }
+                )
+              }
+                </Grid>
+              </Grid>
+            </Grid>
+            </> 
+      )
+    }
+
+    //function to get each champion image, star, and items
     const championImageDetails = (champion) => {
       const {rarity} = champion;
       let borderColor = 'white';
@@ -436,57 +529,7 @@ const Profile = () => {
       )
     }
 
-    const placementSection = () => {
-      
-      let avgRank, numberOfWins, numberOfTops;
-      avgRank = numberOfWins = numberOfTops = 0; 
-      const matchArray = [...matchesArray];
-      for (let i = 0; i < matchArray.length; i++) {
-        let participantIndex = getParticipantIndex(matchArray[i]);
-        const p = matchArray[i]['participants'];
-        let {placement} = p[participantIndex];
-
-        avgRank += placement;
-        if (placement === 1) {
-          numberOfWins += 1;
-        } 
-        if (placement <= 4 && placement > 1) {
-          numberOfTops += 1;
-        }
-      }
-      avgRank = avgRank / matchArray.length;
-      
-      return (
-      <>
-      <Grid >
-        <Grid container direction = "row" justify = 'space-around' alignItems = 'center' className = {classes.avgRankContainer}>
-          <Grid item >
-            <div className = {classes.avgRankTextContainer}>
-              <Typography className = {classes.avgRankText}>Avg Rank:</Typography>
-              <Typography className = {classes.winsText}>{avgRank}</Typography>
-            </div>
-          </Grid>
-          <Grid item>
-            <div className = {classes.avgRankTextContainer} >
-              <Typography className = {classes.avgRankText}>Wins:</Typography>
-              <Typography className = {classes.winsText}>{numberOfWins}</Typography>
-            </div>
-          </Grid>
-          <Grid item>
-          <div className = {classes.avgRankTextContainer}>
-              <Typography  className = {classes.avgRankText}>Tops:</Typography>
-              <Typography className = {classes.winsText}>{numberOfTops}</Typography>
-            </div>
-          </Grid>
-        </Grid>
-        <div  style = {{marginTop: '2px'}} >
-          <Bar width = {350} height = {110} options={options} data = {placementChartData}/>
-        </div>
-       </Grid>
-      
-      </>)
-    }
-
+    //function for creating the champion stats table
     const createTableArray = () => {
       let championDict = {};
       const matchArray = [...matchesArray];
@@ -537,43 +580,9 @@ const Profile = () => {
                 
                 <Grid container direction="row"  className = {classes.container}>  
                   <Grid container spacing = {3} className = {classes.firstRowContainer}>
-                    <Grid item md = {4} sm = {6} xs = {12}  className = {classes.firstRowSubContainer}>
-                      <Paper elevation = {3} className = {classes.firstRowPaper}>
-                        <Grid container direction = "row" spacing = {2}>
-                            <Grid item >
-                              <img alt = "icon" src = {`https://ddragon.leagueoflegends.com/cdn/${ddragonVersion}/img/profileicon/${profileIconId}.png`} className = {classes.profileIcon}></img>
-                            </Grid>
-                            <Grid item>
-                              <Typography display = "inline" className = {classes.title}>{summonerName} </Typography>
-                              <Typography display =  "inline" className = {classes.region} >{region.toUpperCase()}</Typography>
-                              <Typography gutterBottom className = {classes.summonerLevel}>Level {summonerLevel}</Typography>
-                              <Button variant = "contained" className = {classes.renewButton}>Renew</Button>
-                              <Typography></Typography>
-                            </Grid>
-                        </Grid>  
-                        </Paper>
-                    </Grid>
-                    
-                    <Grid item md = {4} sm = {6} xs = {12} className = {classes.firstRowSubContainer}>
-                      <Paper elevation = {3}  className = {classes.firstRowPaper}>
-                      <Grid container direction = "row" spacing = {2}>
-                      <Grid item>
-                        <img className = {classes.rankEmblem} src = {`/ranked-emblems/Emblem_${tier}.png`} alt = ""/>
-                      </Grid>
-                      
-                      <Grid item>
-                        <Typography className = {classes.title}>{`${tier} ${rankNumeral}`}</Typography>
-                        <Typography className = {classes.lp}> {`LP: ${lp}`}</Typography>
-                        <Typography className = {classes.winsText}>{`Wins: ${wins}`}</Typography>
-                        <Typography className = {classes.winsText}>{`Losses: ${losses}`}</Typography>
-                        <Typography className = {classes.winsText}>{`Total Games: ${wins + losses}`}</Typography>
-                        <Typography className = {classes.winsText}>{`Win Rate: ${Number.parseFloat((wins/(wins + losses))* 100).toFixed(2)}%`}</Typography>
-                        
-                      </Grid>
-                        
-                      </Grid>
-                      </Paper>
-                    </Grid>
+                    {
+                      nameAndTierSection()
+                    }
                     
                     <Grid item md = {4} sm = {6} xs = {12} className = {classes.firstRowSubContainer}>
                        <Paper elevation = {3}  className = {classes.firstRowPaper}>
@@ -589,12 +598,12 @@ const Profile = () => {
                   
                   <Grid container spacing = {8} >
 
-                  <Grid item md = {8} sm = {12}>
+                    <Grid item md = {8} sm = {12}>
                       
-                      <Typography className = {classes.title} gutterBottom>Match History</Typography>
+                      <Typography variant = "h4" gutterBottom>Match History</Typography>
                       
                       <Grid container direction = "column" spacing = {2} >
-                      { matchesArray.length === matchesPerPage &&
+                      { matchesArray.length >= matchesPerPage &&
                       
                         [...matchesArray].sort((a,b) => {
                           return b.game_datetime - a.game_datetime;
@@ -615,9 +624,9 @@ const Profile = () => {
                     </Grid>
 
                       <Grid item md = {4} sm = {6} xs = {12}>
-                        <Typography className = {classes.title} style = {{marginLeft: '8px'}} gutterBottom>Champion Stats</Typography>
+                        <Typography variant = "h4" style = {{marginLeft: '8px'}} gutterBottom>Champion Stats</Typography>
                         
-                          { matchesArray.length === matchesPerPage &&
+                          { matchesArray.length >= matchesPerPage &&
                           createTableArray()
                           }
                       </Grid>
