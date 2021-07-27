@@ -82,7 +82,7 @@ export default function CustomizedTables(props) {
             
             <StyledTableRow key={index}>
               <StyledTableCell component="th" scope="row">
-                <img className = {classes.champIcon} alt = {item[0].substring(5)} src = {`/champions/${item[0]}.png`} 
+                <img className = {classes.champIcon} alt = "" src = {`/champions/${item[0]}.png`} 
                 title = {`${item[0].substring(5)}`} style = {{border: `2px ${championBorderColor(item[1][0])} solid`}} />
               </StyledTableCell>
               <StyledTableCell style ={{color:'white'}}>{item[1][1]}</StyledTableCell>

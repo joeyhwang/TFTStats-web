@@ -76,6 +76,7 @@ const Profile = () => {
         dispatch(getSummonerBySearch(name, region)).then(res => {
           //get ranked tft data for summoner
           try {
+            console.log(res[summonerDetailsJson][0]);
             if (res[summonerDetailsJson][0]['queueType'] !== 'RANKED_TFT_TURBO') {
               const {leaguePoints, wins, losses, tier, rank} = res[summonerDetailsJson][0];
               setLP(leaguePoints);
@@ -99,6 +100,7 @@ const Profile = () => {
               setPuuid(puuid);
           } catch (e) {
             setSummonerExists(false);
+            console.log(e)
             setLoading(false);
           }
           
@@ -266,7 +268,7 @@ const Profile = () => {
             <Paper elevation = {3} className = {classes.firstRowPaper}>
               <Grid container direction = "row" spacing = {2}>
                   <Grid item >
-                    <img alt = "icon" src = {`https://ddragon.leagueoflegends.com/cdn/${ddragonVersion}/img/profileicon/${profileIconId}.png`} className = {classes.profileIcon}></img>
+                    <img alt = "" src = {`https://ddragon.leagueoflegends.com/cdn/${ddragonVersion}/img/profileicon/${profileIconId}.png`} className = {classes.profileIcon}></img>
                   </Grid>
                   <Grid item>
                     <Typography display = "inline" className = {classes.title}>{summonerName} </Typography>
@@ -424,7 +426,7 @@ const Profile = () => {
                 <TimeAgo className = {classes.timeAgo} date = {new Date(match['game_datetime'])}></TimeAgo>
               </Grid>
               <Grid item md = {2} className = {classes.matchSubContainer} >
-                <img className = {classes.llImage} alt = "beef" src = {llLink} title = {littleLegend[1]}/>
+                <img className = {classes.llImage} alt = "" src = {llLink} title = {littleLegend[1]}/>
                 <Typography className = {classes.matchSubContainerText}>Round {convertedLastRound}</Typography>
                 <Typography className = {classes.matchSubContainerText}>Level {level}</Typography>
               </Grid>
@@ -438,7 +440,7 @@ const Profile = () => {
                                 <div style = {{backgroundImage: `url(/traits/${traitArray[1]}.png)`, backgroundPosition: 'center', 
                                 height: '25px', width: '27px', display: 'flex', alignItems: 'center', justifyContent: 'center'}} >
                                   
-                                  <img className = {classes.traits} alt = {traitArray[0].substring(2).toLowerCase()} 
+                                  <img className = {classes.traits} alt ="" 
                                   src = {`/traits/${traitArray[0].substring(2).toLowerCase()}.svg`} title = {`${traitArray[0]}`} />
                                 </div>
                               </Grid>
@@ -509,7 +511,7 @@ const Profile = () => {
               }
             </Grid>
 
-           <img alt = "champ" style = {{borderColor: `${borderColor}`}} className = {classes.championImage} 
+           <img alt = "" style = {{borderColor: `${borderColor}`}} className = {classes.championImage} 
            src = {`/champions/${champion['character_id']}.png`} title = {`${champion['character_id'].substring(5)}`} />
           <Grid container direction = "row" alignItems = "center" justify = "center">
           {
@@ -517,7 +519,7 @@ const Profile = () => {
               return (<div key = {index}>
                     <Grid item>
                     
-                    <img alt = "item" className = {classes.items} src = {`/items/${item}.png`} title = {`${itemDictionary[item]}`}></img>
+                    <img alt = "" className = {classes.items} src = {`/items/${item}.png`} title = {`${itemDictionary[item]}`}></img>
                     </Grid>
               
               </div>)
@@ -637,7 +639,7 @@ const Profile = () => {
                : 
                <Container style ={{display: 'flex', direction: 'column', justifyContent: 'center', alignItems: 'center'}}>
                   <Grid>
-                  <img alt = 'dog' src = '/kekwdoge.png' style = {{borderRadius: '30px'}}/>
+                  <img alt = '' src = '/kekwdoge.png' style = {{borderRadius: '30px'}}/>
                     
                   </Grid>
                   <Grid>

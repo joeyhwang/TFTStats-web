@@ -18,8 +18,8 @@ const Appbar = () => {
                 <div className = {classes.linkContainer}>
                     <Button href = "/" className = {classes.title}>Home</Button>
                     <Button href = "/" className = {classes.title}>Leaderboards</Button>
-                    <Button href = "/" className = {classes.title}>Champions</Button>
-                    <Button href = "/" className = {classes.title}>Items</Button>
+                    <Button href = "/champions" className = {classes.title}>Champions</Button>
+                    <Button href = "/items" className = {classes.title}>Items</Button>
 
                 
                 </div>
