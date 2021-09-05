@@ -18,23 +18,6 @@ const useStyles = makeStyles((theme) => ({
       
     },
 
-    avgRankContainer: {
-      color: 'white',
-      marginBottom: '2px',
-    },
-
-    avgRankTextContainer: {
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center'
-    },
-
-    avgRankText: {
-      fontSize: '18px',
-      fontWeight: '600',
-      
-    },
-
     firstRowPaper: {
       display: 'flex',
       alignItems: 'center',
