@@ -13,7 +13,7 @@ const SearchBar = () => {
     const [open,setOpen] = useState(false);
     const anchorRef = useRef(null);
     const [selectedIndex, setSelectedIndex] = useState(regions.findIndex(r => r === localStorage.getItem('region')) || 0);
-    var [region, setRegion] = useState(localStorage.getItem('region') ||'BR'); 
+    const [region, setRegion] = useState(localStorage.getItem('region') === null ? 'BR' : localStorage.getItem('region')); 
     const [searchText, setSearch] = useState('');
 
     const handleMenuItemClick = (e, i) => {

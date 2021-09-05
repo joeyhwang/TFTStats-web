@@ -1,48 +1,39 @@
 import React, {useState, useEffect} from 'react'
-import {Container, Grid, Typography,Button, Paper} from '@material-ui/core'
-import useStyles from './styles';
-import { useParams, useLocation } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
-import {profileJson, matchJson, summonerDetailsJson} from '../../constants/summonerJson';
-import {getSummonerBySearch, getMatchByMatchID} from '../../actions/profile.js';
-import StarIcon from '@material-ui/icons/Star';
-import { Bar } from 'react-chartjs-2';
-import TimeAgo from 'react-timeago';
-import CircularProgress from '@material-ui/core/CircularProgress';
+import {Container, Grid, Typography, Paper} from '@material-ui/core'
+import useStyles from './styles'
+import { useParams, useLocation } from 'react-router-dom'
+import { useDispatch } from 'react-redux'
+import {profileJson, matchJson, summonerDetailsJson} from '../../constants/summonerJson'
+import {getSummonerBySearch, getMatchByMatchID} from '../../actions/profile.js'
+import StarIcon from '@material-ui/icons/Star'
+import { Bar } from 'react-chartjs-2'
+import TimeAgo from 'react-timeago'
+import CircularProgress from '@material-ui/core/CircularProgress'
 import Table from './Table'
-import * as api from '../../api/index.js';
-import ReactPaginate from 'react-paginate';
-import "./Profile.css";
+import * as api from '../../api/index.js'
+import ReactPaginate from 'react-paginate'
+import "./Profile.css"
+import ProfileCard from '../ProfileCard/ProfileCard'
 
 const Profile = () => {
-    const { region, name } = useParams();
-    const dispatch = useDispatch();
-    const location = useLocation();
-    const classes = useStyles();
-    const [summonerName,setName] = useState('');
-    const [puuid, setPuuid] = useState('');
-    const [profileIconId, setId] = useState(0);
-    const [summonerLevel, setSummonerLevel] = useState(0);
-    const [lp, setLP] = useState(0);
-    const [rankNumeral, setRankNumeral] = useState('');
-    const [wins, setWins] = useState(0);
-    const [losses, setLosses] = useState(0);
-    const [tier, setTier] = useState('');
-    const [matchIdArray, setMatchIdArray] = useState([]);
-    const [matchesArray, setMatchesArray] = useState([]);
-    const [summonerExists, setSummonerExists] = useState(true);
-    const [loading, setLoading] = useState(true);
-    const [itemDictionary, setItemDictionary] = useState(null);
-    const [littleLegendDictionary, setLittleLegendDictionary] = useState(null);
-    const [cachedMatchesArray, setCatchedMatchesArray] = useState([]);
-    let placementData = [0,0,0,0,0,0,0,0];
-    const numberOfGames = 10;
-    const [ddragonVersion, setDdragonVersion] = useState("");
-    const matchesPerPage = 10;
-
-    const pageCount = Math.ceil(matchIdArray.length / matchesPerPage);
+    const { region, name } = useParams()
+    const dispatch = useDispatch()
+    const [profileInfo, setProfileInfo] = useState({name: '', profileIconId: '', summonerLevel: '', puuid: '', tier: '', leaguePoints: '', wins: '', losses: '', rank: ''})
+    const location = useLocation()
+    const classes = useStyles()
+    const [matchIdArray, setMatchIdArray] = useState([])
+    const [matchesArray, setMatchesArray] = useState([])
+    const [summonerExists, setSummonerExists] = useState(true)
+    const [loading, setLoading] = useState(true)
+    const [itemDictionary, setItemDictionary] = useState(null)
+    const [littleLegendDictionary, setLittleLegendDictionary] = useState(null)
+    const [cachedMatchesArray, setCatchedMatchesArray] = useState([])
+    let placementData = [0,0,0,0,0,0,0,0]
+    const numberOfGames = 10
+    const [ddragonVersion, setDdragonVersion] = useState("")
+    const matchesPerPage = 10
+    const pageCount = Math.ceil(matchIdArray.length / matchesPerPage)
     // const displayUsers = matchIdArray.slice(pagesVisited, pagesVisited + matchesPerPage); 
-
 
     useEffect(() => {
       //fetch item and little legend json and convert it into a dictionary to store it in the state
@@ -70,34 +61,21 @@ const Profile = () => {
     
     useEffect(() => {
         //runs whenever a summoner is searched
-        setMatchesArray([]);
-        setSummonerExists(true);
-        setLoading(true);
+        setMatchesArray([])
+        setSummonerExists(true)
+        setLoading(true)
         dispatch(getSummonerBySearch(name, region)).then(res => {
           //get ranked tft data for summoner
           try {
-            console.log(res[summonerDetailsJson][0]);
+          
+            const {name, profileIconId, summonerLevel, puuid} = res[profileJson]
             if (res[summonerDetailsJson][0]['queueType'] !== 'RANKED_TFT_TURBO') {
-              const {leaguePoints, wins, losses, tier, rank} = res[summonerDetailsJson][0];
-              setLP(leaguePoints);
-              setWins(wins);
-              setLosses(losses);
-              setTier(tier);
-              setRankNumeral(rank);
+              const {leaguePoints, wins, losses, tier, rank} = res[summonerDetailsJson][0]
+              setProfileInfo(prevState => ({...prevState, leaguePoints: leaguePoints, wins: wins, losses: losses, tier: tier, rank: rank, name: name, profileIconId: profileIconId, summonerLevel: summonerLevel, puuid: puuid}))
             } else {
-              const {leaguePoints, wins, losses, tier, rank} = res[summonerDetailsJson][1];
-              setLP(leaguePoints);
-              setWins(wins);
-              setLosses(losses);
-              setTier(tier);
-              setRankNumeral(rank);
+              const {leaguePoints, wins, losses, tier, rank} = res[summonerDetailsJson][1]
+              setProfileInfo(prevState => ({...prevState, leaguePoints: leaguePoints, wins: wins, losses: losses, tier: tier, rank: rank, name: name, profileIconId: profileIconId, summonerLevel: summonerLevel, puuid: puuid}))
             }
-              //set all profile variables
-              const {name, profileIconId, summonerLevel, puuid} = res[profileJson];
-              setName(name);
-              setId(profileIconId);
-              setSummonerLevel(summonerLevel);
-              setPuuid(puuid);
           } catch (e) {
             setSummonerExists(false);
             console.log(e)
@@ -174,7 +152,7 @@ const Profile = () => {
         const p = match['participants'];
         let participantIndex = 0;
         for (let i = 0; i < p.length; i++) {
-          if (p[i]['puuid'] === puuid) {
+          if (p[i]['puuid'] === profileJson.puuid) {
             participantIndex = i;
           }
         }
@@ -259,49 +237,6 @@ const Profile = () => {
          return '1-1';
       }
     }
-
-      //function for displaying the first two cards: name and tier
-      const nameAndTierSection = () => {
-        return (
-          <>
-          <Grid item md = {4} sm = {6} xs = {12}  className = {classes.firstRowSubContainer}>
-            <Paper elevation = {3} className = {classes.firstRowPaper}>
-              <Grid container direction = "row" spacing = {2}>
-                  <Grid item >
-                    <img alt = "" src = {`https://ddragon.leagueoflegends.com/cdn/${ddragonVersion}/img/profileicon/${profileIconId}.png`} className = {classes.profileIcon}></img>
-                  </Grid>
-                  <Grid item>
-                    <Typography display = "inline" className = {classes.title}>{summonerName} </Typography>
-                    <Typography display =  "inline" className = {classes.region} >{region.toUpperCase()}</Typography>
-                    <Typography gutterBottom className = {classes.summonerLevel}>Level {summonerLevel}</Typography>
-                    <Button variant = "contained" className = {classes.renewButton}>Renew</Button>
-                    <Typography></Typography>
-                  </Grid>
-              </Grid>  
-              </Paper>
-          </Grid>
-            
-            <Grid item md = {4} sm = {6} xs = {12} className = {classes.firstRowSubContainer}>
-              <Paper elevation = {3}  className = {classes.firstRowPaper}>
-                <Grid container direction = "row" spacing = {2}>
-                  <Grid item>
-                    <img className = {classes.rankEmblem} src = {`/ranked-emblems/Emblem_${tier}.png`} alt = ""/>
-                  </Grid>
-                  
-                  <Grid item>
-                    <Typography className = {classes.title}>{`${tier} ${rankNumeral}`}</Typography>
-                    <Typography className = {classes.lp}> {`LP: ${lp}`}</Typography>
-                    <Typography className = {classes.winsText}>{`Wins: ${wins}`}</Typography>
-                    <Typography className = {classes.winsText}>{`Losses: ${losses}`}</Typography>
-                    <Typography className = {classes.winsText}>{`Total Games: ${wins + losses}`}</Typography>
-                    <Typography className = {classes.winsText}>{`Win Rate: ${Number.parseFloat((wins/(wins + losses))* 100).toFixed(2)}%`}</Typography>
-                  </Grid>
-                </Grid>
-              </Paper>
-            </Grid>
-          </>
-        )
-      }
 
       
     //function for the third card: avg rank, wins, tops
@@ -582,9 +517,7 @@ const Profile = () => {
                 
                 <Grid container direction="row"  className = {classes.container}>  
                   <Grid container spacing = {3} className = {classes.firstRowContainer}>
-                    {
-                      nameAndTierSection()
-                    }
+                    <ProfileCard ddragonVersion = {ddragonVersion} region = {region} profileInfo = {profileInfo}/>
                     
                     <Grid item md = {4} sm = {6} xs = {12} className = {classes.firstRowSubContainer}>
                        <Paper elevation = {3}  className = {classes.firstRowPaper}>
@@ -592,10 +525,8 @@ const Profile = () => {
                         placementSection()
                       }  
        
-                      </Paper>
-                  
+                      </Paper>   
                     </Grid>
-                   
                   </Grid>
                   
                   <Grid container spacing = {8} >
@@ -632,9 +563,7 @@ const Profile = () => {
                           createTableArray()
                           }
                       </Grid>
-                      
                     </Grid>
-
                 </Grid>
                : 
                <Container style ={{display: 'flex', direction: 'column', justifyContent: 'center', alignItems: 'center'}}>
