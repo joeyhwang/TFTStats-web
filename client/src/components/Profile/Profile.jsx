@@ -6,7 +6,6 @@ import { useDispatch } from 'react-redux'
 import {profileJson, matchJson, summonerDetailsJson} from '../../constants/summonerJson'
 import {getSummonerBySearch, getMatchByMatchID} from '../../actions/profile.js'
 import StarIcon from '@material-ui/icons/Star'
-import { Bar } from 'react-chartjs-2'
 import TimeAgo from 'react-timeago'
 import CircularProgress from '@material-ui/core/CircularProgress'
 import Table from './Table'
@@ -41,9 +40,12 @@ const Profile = () => {
         let itemD = {};
         let llDict = {};
         api.items.then((itemResponse)=>{
+          console.log(itemResponse)
           for (let item = 0; item < itemResponse.length; item++) {          
             itemD[itemResponse[item]['id']] = itemResponse[item]['name'];
           }
+          const beef = {5: itemD}
+          console.log(beef)
           setItemDictionary(itemD);
         });
         
@@ -68,8 +70,10 @@ const Profile = () => {
         dispatch(getSummonerBySearch(name, region)).then(res => {
           //get ranked tft data for summoner
           try {
-          
+            console.log("beef")          
             const {name, profileIconId, summonerLevel, puuid} = res[profileJson]
+            console.log("beef")
+            console.log(res)
             if (res[summonerDetailsJson][0]['queueType'] !== 'RANKED_TFT_TURBO') {
               const {leaguePoints, wins, losses, tier, rank} = res[summonerDetailsJson][0]
               setProfileInfo(prevState => ({...prevState, leaguePoints: leaguePoints, wins: wins, losses: losses, tier: tier, rank: rank, name: name, profileIconId: profileIconId, summonerLevel: summonerLevel, puuid: puuid}))
@@ -110,8 +114,6 @@ const Profile = () => {
           })
         }
       }
-  
-
 
     const getParticipantIndex = (match) => {
         const p = match['participants'];
@@ -123,7 +125,6 @@ const Profile = () => {
         }
         return participantIndex;
     }
-
     
     //function for converting the last round integer into game rounds
     const convertLastRound = (lastRound) => {
@@ -316,7 +317,7 @@ const Profile = () => {
                                 <div style = {{backgroundImage: `url(/traits/${traitArray[1]}.png)`, backgroundPosition: 'center', 
                                 height: '25px', width: '27px', display: 'flex', alignItems: 'center', justifyContent: 'center'}} >
                                   
-                                  <img className = {classes.traits} alt ="" 
+                                  <img className = {classes.traits} alt ={`${traitArray[0].substring(2).toLowerCase()}`} 
                                   src = {`/traits/${traitArray[0].substring(2).toLowerCase()}.svg`} title = {`${traitArray[0]}`} />
                                 </div>
                               </Grid>

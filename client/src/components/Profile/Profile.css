@@ -26,4 +26,6 @@
     background-color: lightblue;
   }
 
-  
+  .paginationDisabled {
+    display: none;
+  }
