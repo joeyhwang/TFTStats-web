@@ -27,8 +27,9 @@ const Profile = () => {
     const [loading, setLoading] = useState(true)
     const [itemDictionary, setItemDictionary] = useState(null)
     const [littleLegendDictionary, setLittleLegendDictionary] = useState(null)
-    const [cachedMatchesArray, setCatchedMatchesArray] = useState([])
+    //const [cachedMatchesArray, setCatchedMatchesArray] = useState([])
     let placementData = [0,0,0,0,0,0,0,0]
+    const [errorMessage, setErrorMessage] = useState(`doesn't exist.`)
     const numberOfGames = 10
     const [ddragonVersion, setDdragonVersion] = useState("")
     const matchesPerPage = 10
@@ -44,8 +45,7 @@ const Profile = () => {
           for (let item = 0; item < itemResponse.length; item++) {          
             itemD[itemResponse[item]['id']] = itemResponse[item]['name'];
           }
-          const beef = {5: itemD}
-          console.log(beef)
+
           setItemDictionary(itemD);
         });
         
@@ -70,10 +70,10 @@ const Profile = () => {
         dispatch(getSummonerBySearch(name, region)).then(res => {
           //get ranked tft data for summoner
           try {
-            console.log("beef")          
             const {name, profileIconId, summonerLevel, puuid} = res[profileJson]
-            console.log("beef")
-            console.log(res)
+            if (res[summonerDetailsJson].length === 0 ) {
+              setErrorMessage("doesn't have any ranked games in this set.")
+            }
             if (res[summonerDetailsJson][0]['queueType'] !== 'RANKED_TFT_TURBO') {
               const {leaguePoints, wins, losses, tier, rank} = res[summonerDetailsJson][0]
               setProfileInfo(prevState => ({...prevState, leaguePoints: leaguePoints, wins: wins, losses: losses, tier: tier, rank: rank, name: name, profileIconId: profileIconId, summonerLevel: summonerLevel, puuid: puuid}))
@@ -90,7 +90,6 @@ const Profile = () => {
           setMatchIdArray(res[profileJson][matchJson]);
           for (const matchId of res[profileJson][matchJson].slice(0, matchesPerPage)) {
             dispatch(getMatchByMatchID(matchId, region)).then(res => {
-              console.log(res);
               setMatchesArray(arr => [...arr, res['info']]);
             })
           }
@@ -450,7 +449,6 @@ const Profile = () => {
 
     return (
         <div className = {classes.root}>
-        
             <Container maxWidth = "lg" className = {classes.background}>
                 {loading ?
                   <CircularProgress /> :
@@ -497,7 +495,6 @@ const Profile = () => {
                       />
                       </Grid>
                     </Grid>
-
                       <Grid item md = {4} sm = {6} xs = {12}>
                         <Typography variant = "h4" style = {{marginLeft: '8px'}} gutterBottom>Champion Stats</Typography>
                         
@@ -514,10 +511,8 @@ const Profile = () => {
                     
                   </Grid>
                   <Grid>
-                    
-                    <Typography className = {classes.summonerError}>{name} {region.toUpperCase()} doesn't have any ranked TFT Stats or doesn't exist</Typography>
+                    <Typography className = {classes.summonerError}>{name} {region.toUpperCase()} {errorMessage}</Typography>
                   </Grid>
-
                </Container>
               }
             </Container>

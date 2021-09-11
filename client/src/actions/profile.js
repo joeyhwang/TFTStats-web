@@ -11,7 +11,6 @@ export const getSummonerBySearch = (name, region) => async (dispatch) => {
       
     } catch (error) {
       console.log(error);
-      return error;
     }
 };
 

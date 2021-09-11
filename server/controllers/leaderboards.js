@@ -7,17 +7,22 @@ const router = express.Router();
 dotenv.config();
 const API_KEY = process.env.API_KEY;
 
-export const getChallengers = async (req, res) => {
+export const getTierSummoners = async (req, res) => {
 
-    var {region} = req.params;
+    let {tier,region} = req.params;
     console.log(`${region}`);
-
+    let link = ''
     let {finalRegion} = findRegion(region);
+    switch (tier) {
+        case 'diamond': case 'platinum': case 'gold': case 'silver': case 'bronze': case 'iron':    
+            link = encodeURI(`https://${finalRegion}.api.riotgames.com/tft/league/v1/entries/${tier.toUpperCase()}/I?page=1&api_key=${API_KEY}`);
+            break;
+        default:
+            link = encodeURI(`https://${finalRegion}.api.riotgames.com/tft/league/v1/${tier}?api_key=${API_KEY}`);
 
-    const chall = encodeURI(`https://${finalRegion}.api.riotgames.com/tft/league/v1/challenger?api_key=${API_KEY}`);
-    console.log(chall);
-
-    fetch(chall)
+    }
+    console.log(link)
+    fetch(link)
     .then(res => res.json())
     .then(json => {
            
@@ -33,7 +38,7 @@ export const getChallengers = async (req, res) => {
 
 
 function findRegion(region) {
-    switch(region) {
+    switch(region.toUpperCase()) {
         case "BR":
             region = "br1"
             break;

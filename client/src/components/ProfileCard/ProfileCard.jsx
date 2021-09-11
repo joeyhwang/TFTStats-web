@@ -12,10 +12,12 @@ const ProfileCard = ({ddragonVersion, region, profileInfo}) => {
                 <Grid item >
                   <img alt = "" src = {`https://ddragon.leagueoflegends.com/cdn/${ddragonVersion}/img/profileicon/${profileInfo.profileIconId}.png`} className = {classes.profileIcon}></img>
                 </Grid>
-                <Grid item>
-                  <Typography display = "inline" className = {classes.title}>{profileInfo.name} </Typography>
-                  <Typography display =  "inline" className = {classes.region} >{region.toUpperCase()}</Typography>
-                  <Typography gutterBottom className = {classes.summonerLevel}>Level {profileInfo.summonerLevel}</Typography>
+                <Grid item >
+                  <div>
+                    <Typography display = "inline" className = {classes.title}>{profileInfo.name} </Typography>
+                    <Typography display =  "inline" className = {classes.region} >{region.toUpperCase()}</Typography>
+                    <Typography gutterBottom className = {classes.summonerLevel}>Level {profileInfo.summonerLevel}</Typography>
+                  </div>
                   <Button variant = "contained" className = {classes.renewButton}>Renew</Button>
                   <Typography></Typography>
                 </Grid>

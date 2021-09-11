@@ -21,7 +21,8 @@ export const getSummonerBySearch = async (req,res) => {
     let {finalRegion, country} = findRegionAndCountry(region);
     
     //create profile link to fetch profile data from riot api
-    const profileLink = encodeURI(`https://${finalRegion}.api.riotgames.com/tft/summoner/v1/summoners/by-name/${name}?api_key=${API_KEY}`); 
+    const profileLink = encodeURI(`https://${finalRegion}.api.riotgames.com/tft/summoner/v1/summoners/by-name/${name}?api_key=${API_KEY}`);
+     
     console.log(profileLink);
 
     //fetch profile information and use puuid to find match history
@@ -42,8 +43,10 @@ export const getSummonerBySearch = async (req,res) => {
         console.log(matchJson);
         profileJson = {...profileJson, matchJson};
         //get summoner details (rank, wins, losses)
+        console.log(`https://${finalRegion}.api.riotgames.com/tft/league/v1/entries/by-summoner/${id}?api_key=${API_KEY}`)
         return fetch(encodeURI(`https://${finalRegion}.api.riotgames.com/tft/league/v1/entries/by-summoner/${id}?api_key=${API_KEY}`));
         }
+
     ).then(summonerDetailsResp => summonerDetailsResp.json())
     .then (summonerDetailsJson => 
         {
@@ -69,13 +72,11 @@ export const getMatchDetails = async (req,res) => {
     
     //call riot api to fetch match details
     const matchLink = encodeURI(`https://${country}.api.riotgames.com/tft/match/v1/matches/${match}?api_key=${API_KEY}`);
-    console.log(matchLink);
 
     const getData = async () => {
         try {
             const matchRes = await fetch(matchLink);
             const matchJson = await matchRes.json();
-            console.log(matchJson);
             //return match details in json format to front-end
             res.status(200).json({data: matchJson});
 

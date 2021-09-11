@@ -16,8 +16,7 @@ const App = () => {
                 <Route path = "/profile/:region/:name" exact component = {Profile}/>
                 <Route path = "/champions" exact component = {Champions}/>
                 <Route path = "/items" exact component = {Items}/>
-                <Route path = "/leaderboards/na" exact component = {Leaderboards}/>
-                <Route path = "/leaderboards/oce" exact component = {Leaderboards}/>
+                <Route path = "/leaderboards/:region/:tier" exact component = {Leaderboards}/>
             </Switch>
            
 

@@ -5,31 +5,27 @@ import {makeStyles} from '@material-ui/core/styles';
 const useStyles = makeStyles((theme) => ({
 
     profileIcon: {
-      height: '130px',
-      width: '130px',
-      marginLeft: '20px',
+      width: '9rem',
+      marginLeft: '1.2rem',
       borderRadius: '6px',
     },
+
     renewButton: {
-      marginTop: '25px',
-      minHeight: '40px',
-      width: '25%',
+      marginTop: '2.5rem',
       color: 'white',
       backgroundColor: 'gray', 
-      fontSize: '12px',
-      
+      fontSize: '1rem',
+      padding: '0.5 1rem',
     },
     rankEmblem: {
-      marginLeft: '10px',
-      marginRight: '3px',
-      height: '145px',
+      marginLeft: '0.5rem',
       width: '145px',
       
     },
     title: {
-      fontSize: '22px',
+      fontSize: '1.5rem',
       fontWeight: '550',
-      color: 'white',
+      color: '#fff',
     },
     region : {
       fontSize: '18px',

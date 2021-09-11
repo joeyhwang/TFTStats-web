@@ -59,7 +59,7 @@ const SearchBar = () => {
 
     return (
         
-        <Grid container direction="row" justify="center" alignItems="center">
+        <Grid container direction="row" justify="center" alignItems="center" className ={classes.searchGrid}>
              <ButtonGroup disableElevation variant="contained" className = {classes.region} color="default" ref={anchorRef} aria-label="split button">
             
             <Button style = {{backgroundColor: 'gray', color: 'white'}}  onClick={handleToggle}>

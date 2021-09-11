@@ -1,57 +1,41 @@
-import React, {useState, useEffect, setState} from 'react'
-import ButtonGroup from '@material-ui/core/ButtonGroup';
-import Button from '@material-ui/core/Button';
+import React, {useState} from 'react'
 import Box from '@material-ui/core/Box';
 import ToggleButton from '@material-ui/lab/ToggleButton';
 import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
-import {useDispatch} from 'react-redux';
-import {changeRegion} from '../../actions/leaderboards.js';
-import { useHistory, useLocation } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
+import useStyles from './styles';
 
 
+const Region = ({history}) => {
+    const classes = useStyles()
 
-const Region = () => {
-
-    const dispatch = useDispatch();
-    const history = useHistory();
-    const [selected, setRegion] = useState('NA');
-    const [postData, setPostData] = useState({region: ''})
-
-    const handleRegion = (event, newRegion) => {
-          setRegion(newRegion);
-          dispatch((setPostData(changeRegion(postData))));
-          if(selected != "NA")
-          {
-              history.push(`/leaderboards/${newRegion.toLowerCase()}`);
-          }
+    const {region} = useParams();
+    const [selected, setRegion] = useState(region.toUpperCase());
+    const handleRegion = (event, newRegion) => {        
+        setRegion(newRegion);
+        history.push(`/leaderboards/${newRegion.toLowerCase()}/challenger`);
           
     };
-    /*
-    useEffect(() => {
-        //dispatch((setPostData(changeRegion(postData))));
-         history.push(`/leaderboards/${selected.toLowerCase()}`);
-      }, [selected]);
-    */
 
     return(
-        <Box textAlign='center'>
+        <Box textAlign='center' className = {classes.regionBox}>
             <ToggleButtonGroup
              value={selected}
              exclusive = {true}
              onChange={handleRegion}
              aria-label="text alignment"
              >
-                <ToggleButton value="BR">BR</ToggleButton>
-                <ToggleButton value="EUNE">EUNE</ToggleButton>
-                <ToggleButton value="EUW">EUW</ToggleButton>
-                <ToggleButton value="JP">JP</ToggleButton>
-                <ToggleButton value="KR">KR</ToggleButton>
-                <ToggleButton value="LAN">LAN</ToggleButton>
-                <ToggleButton value="LAS">LAS</ToggleButton>
-                <ToggleButton value="NA">NA</ToggleButton>
-                <ToggleButton value="OCE">OCE</ToggleButton>
-                <ToggleButton value="TR">TR</ToggleButton>
-                <ToggleButton value="RU">RU</ToggleButton>
+                <ToggleButton className = {classes.toggleButton} value="BR">BR</ToggleButton>
+                <ToggleButton className = {classes.toggleButton} value="EUNE">EUNE</ToggleButton>
+                <ToggleButton className = {classes.toggleButton} value="EUW">EUW</ToggleButton>
+                <ToggleButton className = {classes.toggleButton} value="JP">JP</ToggleButton>
+                <ToggleButton className = {classes.toggleButton} value="KR">KR</ToggleButton>
+                <ToggleButton className = {classes.toggleButton} value="LAN">LAN</ToggleButton>
+                <ToggleButton className = {classes.toggleButton} value="LAS">LAS</ToggleButton>
+                <ToggleButton className = {classes.toggleButton} value="NA">NA</ToggleButton>
+                <ToggleButton className = {classes.toggleButton} value="OCE">OCE</ToggleButton>
+                <ToggleButton className = {classes.toggleButton} value="TR">TR</ToggleButton>
+                <ToggleButton className = {classes.toggleButton} value="RU">RU</ToggleButton>
             </ToggleButtonGroup>
         </Box>
     );

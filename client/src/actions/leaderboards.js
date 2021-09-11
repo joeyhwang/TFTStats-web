@@ -1,21 +1,10 @@
 import * as api from '../api/index.js';
-
-export const getChallengers = (region) => async (dispatch) => {
+import { FETCH_LEADERBOARDS, CHANGE_REGION } from '../constants/actionTypes.js';
+export const getLeaderboards = (region, tier) => async (dispatch) => {
     try {
-      const { data: {data} } = await api.getChallengers(region);
-      dispatch({type: "FETCH_LEADERBOARDS", payload: {data}});
-      var temp = []
-      for(var i = 0; i  < data.entries.length; i++)
-      {
-          temp.push(JSON.parse(JSON.stringify(data.entries[i])))
-        
-      }
-      
-      temp.sort(function (a, b) {
-          return (a.leaguePoints < b.leaguePoints) ? 1 : (a.leaguePoints > b.leaguePoints) ? -1 : 0;
-      });
-      //console.dir(temp, {'maxArrayLength': null})
-      return temp;
+      const { data: {data} } = await api.getLeaderboards(region, tier);
+      console.log(data)
+      dispatch({type: FETCH_LEADERBOARDS, payload: {data}});
 
     } catch (error) {
       console.log(error);
@@ -27,7 +16,7 @@ export const changeRegion = (leaderboards) => async (dispatch) => {
   try {
       const{data} = await api.changeRegion(leaderboards);
 
-      dispatch({type: "CHANGE_REGION", payload: data});
+      dispatch({type: CHANGE_REGION, payload: data});
     
   } catch (error) {
       console.log(error);

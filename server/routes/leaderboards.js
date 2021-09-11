@@ -1,8 +1,8 @@
 import express from 'express';
-import { getChallengers } from '../controllers/leaderboards.js';
+import { getTierSummoners } from '../controllers/leaderboards.js';
 
 const router = express.Router();
 
-router.get('/:region', getChallengers);
+router.get('/:region/:tier', getTierSummoners);
 
 export default router;

@@ -10,21 +10,24 @@ const useStyles = makeStyles((theme) => ({
       color: 'white',
       fontSize: '1.5rem',
       margin: '5px',
-      textTransform: 'none'
-      
+      textTransform: 'none',
+      textDecoration: 'none',
+      [theme.breakpoints.down('sm')]: {
+        fontSize: '1rem'
+      },
+      "&:hover": {
+        cursor: 'pointer',
+      }
     },
+    
     linkContainer: {
-      
       display: 'flex',
       flex: 1,
-      justifyContent: 'center'
-    },
-    searchContainer: {
+      justifyContent: 'center',
+
       
     },
-    searchBox: {
-      
-    }
+
   }));
 
   export default useStyles;

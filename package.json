@@ -1,0 +1,27 @@
+{
+  "name": "TFTStats-web",
+  "version": "1.0.0",
+  "description": "https://user-images.githubusercontent.com/19678167/125183209-79055200-e1c9-11eb-940e-9b63727a9c49.mp4",
+  "main": "index.js",
+  "scripts": {
+    "start": "node server/index.js",
+    "server": "nodemon server/index.js",
+    "client": "npm start --prefix client",
+    "dev": "concurrently \"npm run server\" \"npm run client\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/joeyhwang/TFTStats-web.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/joeyhwang/TFTStats-web/issues"
+  },
+  "devDependencies": {
+    "concurrently": "^6.2.1",
+    "nodemon": "^2.0.12"
+  },
+  "homepage": "https://github.com/joeyhwang/TFTStats-web#readme"
+}

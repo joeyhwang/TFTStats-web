@@ -1,20 +1,11 @@
 import React, {useState, useEffect} from 'react'
-import {getChallengers, changeRegion} from '../../actions/leaderboards.js';
-import { useHistory, useLocation } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
+import {getLeaderboards} from '../../actions/leaderboards';
+import { useDispatch, useSelector } from 'react-redux';
 import { withStyles, makeStyles } from '@material-ui/core/styles';
-import Table from '@material-ui/core/Table';
-import TableBody from '@material-ui/core/TableBody';
-import TableCell from '@material-ui/core/TableCell';
-import TableContainer from '@material-ui/core/TableContainer';
-import TableHead from '@material-ui/core/TableHead';
-import TableRow from '@material-ui/core/TableRow';
-import Paper from '@material-ui/core/Paper';
-import TablePagination from '@material-ui/core/TablePagination';
+import {Table, TableBody,TableCell,TableContainer, TableHead,TableRow,Paper,TablePagination} from '@material-ui/core';
 import Region from '../RegionSelect/Region'
-import { useParams } from 'react-router-dom';
-
-
+import { useParams, Link, useHistory } from 'react-router-dom';
+import { Container } from '@material-ui/core';
 
 const StyledTableCell = withStyles((theme) => ({
   head: {
@@ -25,7 +16,6 @@ const StyledTableCell = withStyles((theme) => ({
     fontSize: 14,
   },
 }))(TableCell);
-
 
 //row style
 const StyledTableRow = withStyles((theme) => ({
@@ -43,34 +33,34 @@ const useStyles = makeStyles({
   },
 });
 
-
 const Leaderboards = () => 
 {
   const classes = useStyles();
   //const history = useHistory();
   const dispatch = useDispatch();
-  const [chall, setChall] = useState([]);
   //const [currRegion, setCurrRegion] = useState([]);
-  const {newRegion} = useParams();
+  const {region, tier} = useParams();
   const [page, setPage] = useState(0); // [current state, update func] = (default state)
-  const [rowsPerPage, setRowsPerPage] = React.useState(50);
-  
+  const [rowsPerPage] = useState(50);
+  const {data} = useSelector((state) => state.leaderboards)
+  const history = useHistory();
+  const leaderboards = data ? data.entries : [] 
   const handleChangePage = (event, newPage) =>{
     setPage(newPage);
   };
 
 
   useEffect(() => {
-    dispatch(getChallengers(newRegion)).then(res => {
-      setChall(res.map((item, index) => Object.assign(item, { index })));
-     
-    }
-  );
-  },[newRegion]); //[] do something when region changes
+    dispatch(getLeaderboards(region, tier))
+  
+  },[dispatch, region, tier]); //[] do something when region changes
 
   return (
      <div> 
-      <Region></Region>
+     <Container>
+     {data ? 
+     <>
+      <Region history = {history}></Region>
       <TableContainer component={Paper}>
       <Table className={classes.table} aria-label="chall table">
         <TableHead>
@@ -85,17 +75,21 @@ const Leaderboards = () =>
           </TableRow>
         </TableHead>
         <TableBody>
-          {chall
+          {leaderboards.sort((a,b) => {
+            return b.leaguePoints - a.leaguePoints
+          })
             .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
             .map((sumData, count) => {
               return (
-              <StyledTableRow key = {sumData.id} >
-              <StyledTableCell align ="left">{sumData.index + 1}</StyledTableCell>
-              <StyledTableCell align="left">{sumData.summonerName}</StyledTableCell>
-              <StyledTableCell align="right"> Challenger</StyledTableCell>
+              <StyledTableRow key = {sumData.summonerId} >
+              <StyledTableCell align ="left">{count +1 + page*50}</StyledTableCell>
+              <StyledTableCell align="left">
+              <Link style = {{textDecoration: "none", color: "black"}} to = {`/profile/${region.toLowerCase()}/${sumData.summonerName}`}>{sumData.summonerName}</Link>
+              </StyledTableCell>
+              <StyledTableCell align="right">{data.tier}</StyledTableCell>
               <StyledTableCell align="right">{sumData.leaguePoints}</StyledTableCell>
-              <StyledTableCell align="right">win rate</StyledTableCell>
-              <StyledTableCell align="right">played</StyledTableCell>
+              <StyledTableCell align="right">{(sumData.wins / (sumData.wins+sumData.losses) * 100).toFixed(2)}%</StyledTableCell>
+              <StyledTableCell align="right">{sumData.wins+sumData.losses}</StyledTableCell>
               <StyledTableCell align="right">{sumData.wins}</StyledTableCell>
             </StyledTableRow>
             );
@@ -105,12 +99,16 @@ const Leaderboards = () =>
       <TablePagination
           rowsPerPageOptions={[]}
           component="div"
-          count ={chall.length}
+          count ={leaderboards.length}
           rowsPerPage={50}
           page={page}
           onChangePage={handleChangePage}
         />
     </TableContainer>
+    </>
+    : 
+    <div>loading</div>}
+    </Container>
     </div>
   )
 }

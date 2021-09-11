@@ -1,5 +1,5 @@
 import React from 'react'
-import {Container, Grid,  Typography} from '@material-ui/core';
+import {Container, Grid} from '@material-ui/core';
 import useStyles from './styles';
 import SearchBar from '../SearchBar/SearchBar'
 
@@ -15,10 +15,10 @@ const HomeBody = () => {
                     direction="column"
                     alignItems="center"
                     justify="center"
-                    style={{ minHeight: '60vh' }}
+                    style={{ minHeight: '65vh' }}
                     >
                     <Grid item xs={3}>
-                        <Typography className = {classes.title}>TFT Stats</Typography>
+                        <h1 className = {classes.title}>TFT Stats</h1>
                     </Grid>   
 
                     <SearchBar></SearchBar>

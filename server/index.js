@@ -9,7 +9,7 @@ const app = express();
 dotenv.config();
 
 app.use(express.json());
-app.use(express.urlencoded({ limit: '30mb', extended: true }))
+//app.use(express.urlencoded({ limit: '30mb', extended: true }))
 app.use(cors());
 const PORT = process.env.PORT;
 
@@ -18,7 +18,6 @@ app.use('/profile', profileRoutes);
 app.use('/leaderboards', leaderboardsRoutes);
 
 app.get('/', (req, res) => {
-    console.log('[test]');
 
     res.send("hello from homepage");
 })
